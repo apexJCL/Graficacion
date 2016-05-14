@@ -17,10 +17,16 @@ public class CameraHandler extends CameraInputController {
 
     @Override
     protected boolean process(float deltaX, float deltaY, int button) {
+
         if(model != null){
             if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
                 model.transform.rotate(new Vector3(0, 1, 0), deltaX*100);
                 model.transform.rotate(new Vector3(0, 0, 1), deltaY*100);
+                return true;
+            }
+
+            if(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)){
+                model.transform.translate(deltaX, deltaY, 0);
                 return true;
             }
         }

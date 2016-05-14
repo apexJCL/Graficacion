@@ -42,6 +42,7 @@ public class MainScreen implements Screen {
         inputMultiplexer = new InputMultiplexer(stage, viewer.getInputProcessor());
         // Asignamos la entrada
         Gdx.input.setInputProcessor(inputMultiplexer);
+        Gdx.input.setCatchBackKey(false);
     }
 
     private void instantiateThings() {
@@ -85,8 +86,15 @@ public class MainScreen implements Screen {
         fileMenu.addItem(closeAppItem);
         // COnfig Menu Items
         MenuItem debugToggleItem = new MenuItem("Debug Stage");
+        MenuItem ambientLightItem = new MenuItem("Luz Ambiental");
+        MenuItem directionalLightItem = new MenuItem("Luz Direccional");
         debugToggleItem.addListener(new MenuListener(Action.DEBUG));
+        ambientLightItem.addListener(new MenuListener(Action.AMBIENT));
+        directionalLightItem.addListener(new MenuListener(Action.DIRECTIONAL));
+        // Add to menu
         configMenu.addItem(debugToggleItem);
+        configMenu.addItem(ambientLightItem);
+        configMenu.addItem(directionalLightItem);
         // Final
         menuBar.addMenu(fileMenu);
         menuBar.addMenu(configMenu);
@@ -105,22 +113,13 @@ public class MainScreen implements Screen {
         viewer.render();
         stage.act(delta);
         stage.draw();
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK)){
+            Gdx.app.exit();
+        }
     }
 
     private void keyListener() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-            selector = ModelViewer.ColorSelector.AMBIENT;
-            colorPicker.getTitleLabel().setText("Color Ambiente");
-            colorPicker.setColor(viewer.getAmbientLight().color);
-            root.addActor(colorPicker.fadeIn());
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.D)){
-            selector = ModelViewer.ColorSelector.DIRECTIONAL;
-            colorPicker.getTitleLabel().setText("Color Direccional");
-            colorPicker.setColor(viewer.getAmbientLight().color);
-            root.addActor(colorPicker.fadeIn());
-        }
     }
 
     @Override
@@ -150,7 +149,7 @@ public class MainScreen implements Screen {
     }
 
     public enum Action {
-        DEBUG, EXIT
+        DIRECTIONAL, AMBIENT, DEBUG, EXIT
     }
 
     public class MenuListener extends ClickListener {
@@ -164,6 +163,18 @@ public class MainScreen implements Screen {
         @Override
         public void clicked(InputEvent event, float x, float y) {
             switch (action) {
+                case DIRECTIONAL:
+                    selector = ModelViewer.ColorSelector.DIRECTIONAL;
+                    colorPicker.getTitleLabel().setText("Color Direccional");
+                    colorPicker.setColor(viewer.getAmbientLight().color);
+                    root.addActor(colorPicker.fadeIn());
+                    break;
+                case AMBIENT:
+                    selector = ModelViewer.ColorSelector.AMBIENT;
+                    colorPicker.getTitleLabel().setText("Color Ambiente");
+                    colorPicker.setColor(viewer.getAmbientLight().color);
+                    root.addActor(colorPicker.fadeIn());
+                    break;
                 case DEBUG:
                     stage.setDebugAll(!debug);
                     debug = !debug;

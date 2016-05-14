@@ -3,6 +3,7 @@ package com.itc.e1.Screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -11,9 +12,10 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.utils.Array;
 import com.itc.e1.Custom.CameraHandler;
+
+import java.util.StringTokenizer;
 
 public class ModelViewer {
     private final Environment environment;
@@ -47,7 +49,12 @@ public class ModelViewer {
 
     private void preload() {
         // Leer archivo y agregar a cola de carga
-        assets.load("models/handgun.g3db", Model.class);
+        FileHandle list = Gdx.files.internal("models.txt");
+        String modelList = list.readString();
+        StringTokenizer st = new StringTokenizer(modelList, "\r\n");
+        while(st.hasMoreElements()){
+            assets.load(st.nextToken(), Model.class);
+        }
     }
 
     public void render(){
@@ -64,10 +71,16 @@ public class ModelViewer {
     }
 
     private void doneLoading() {
-        Model handGun = assets.get("models/handgun.g3db", Model.class);
+        Model handGun = assets.get("models/handgun/handgun.g3db", Model.class);
         ModelInstance handgunInstance = new ModelInstance(handGun);
         cameraController.setModel(handgunInstance);
         instances.add(handgunInstance);
+        Array<Model> models = new Array<Model>();
+        assets.getAll(Model.class, models);
+        for(Model model: models){
+            if(model != handGun)
+                instances.add(new ModelInstance(model));
+        }
         loading = false;
     }
 
