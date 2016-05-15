@@ -4,6 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -20,6 +21,7 @@ public class MainScreen implements Screen {
 
     private OrthographicCamera renderCamera;
     private boolean debug = false;
+    private boolean debugOpenGL = false;
     private InputMultiplexer inputMultiplexer;
     private ModelViewer viewer;
     private MenuBar menuBar;
@@ -29,6 +31,8 @@ public class MainScreen implements Screen {
     private ColorPicker colorPicker;
     private VisWindow window;
     private ModelViewer.ColorSelector selector = ModelViewer.ColorSelector.AMBIENT;
+    private VisLabel directionalPositionLabel;
+    private VisLabel directionalPositionValue;
 
     public MainScreen() {
         if (Gdx.app.getType() == Application.ApplicationType.Desktop)
@@ -104,16 +108,25 @@ public class MainScreen implements Screen {
         closeAppItem.addListener(new MenuListener(Action.EXIT));
         fileMenu.addItem(closeAppItem);
         // COnfig Menu Items
-        MenuItem debugToggleItem = new MenuItem("Debug Stage");
+        MenuItem debugToggleItem = new MenuItem("Debug VisUI");
+        MenuItem debugOpenGLItem = new MenuItem("Debug OpenGL Values");
         MenuItem ambientLightItem = new MenuItem("Luz Ambiental");
         MenuItem directionalLightItem = new MenuItem("Luz Direccional");
         debugToggleItem.addListener(new MenuListener(Action.DEBUG));
+        debugOpenGLItem.addListener(new MenuListener(Action.DEBUG_GL));
         ambientLightItem.addListener(new MenuListener(Action.AMBIENT));
         directionalLightItem.addListener(new MenuListener(Action.DIRECTIONAL));
         // Add to menu
         configMenu.addItem(debugToggleItem);
+        configMenu.addItem(debugOpenGLItem);
         configMenu.addItem(ambientLightItem);
         configMenu.addItem(directionalLightItem);
+        // Add Debug Info
+        container.setVisible(false);
+        directionalPositionLabel = new VisLabel("Posición Luz Direccional: ");
+        directionalPositionValue = new VisLabel("");
+        container.add(directionalPositionLabel).expand().top().left();
+        container.add(directionalPositionValue).expand().top().left().row();
         // Final
         menuBar.addMenu(fileMenu);
         menuBar.addMenu(configMenu);
@@ -126,7 +139,7 @@ public class MainScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        keyListener();
+        keyListener(delta);
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         viewer.render();
@@ -136,13 +149,34 @@ public class MainScreen implements Screen {
         if(Gdx.input.isKeyJustPressed(Input.Keys.BACK)){
             Gdx.app.exit();
         }
+
+        if(debugOpenGL)
+            updateData();
     }
 
-    private void keyListener() {
+    private void updateData() {
+        Vector3 dCoord = viewer.getDirectionalCoordinates();
+        directionalPositionValue.setText("X: "+ String.valueOf(dCoord.x)+", Y: "+String.valueOf(dCoord.y)+", Z: "+String.valueOf(dCoord.z));
+    }
+
+    private void keyListener(float delta) {
         if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
             window.centerWindow();
             root.addActor(window.fadeIn());
         }
+
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT))
+            viewer.updateDirectionalLight(1*delta, 0, 0);
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            viewer.updateDirectionalLight(-1*delta, 0, 0);
+        if(Gdx.input.isKeyPressed(Input.Keys.UP))
+            viewer.updateDirectionalLight(0, 1*delta, 0);
+        if(Gdx.input.isKeyPressed(Input.Keys.DOWN))
+            viewer.updateDirectionalLight(0, -1*delta, 0);
+        if(Gdx.input.isKeyPressed(Input.Keys.I))
+            viewer.updateDirectionalLight(0, 0, 1*delta);
+        if(Gdx.input.isKeyPressed(Input.Keys.K))
+            viewer.updateDirectionalLight(0, 0, -1*delta);
     }
 
     @Override
@@ -172,7 +206,7 @@ public class MainScreen implements Screen {
     }
 
     public enum Action {
-        FRUSTUM, DIRECTIONAL, AMBIENT, DEBUG, EXIT
+        DIRECTIONAL, AMBIENT, DEBUG, DEBUG_GL,EXIT
     }
 
     public class MenuListener extends ClickListener {
@@ -201,6 +235,10 @@ public class MainScreen implements Screen {
                 case DEBUG:
                     stage.setDebugAll(!debug);
                     debug = !debug;
+                    break;
+                case DEBUG_GL:
+                    debugOpenGL = !debugOpenGL;
+                    container.setVisible(debugOpenGL);
                     break;
                 case EXIT:
                     Gdx.app.exit();

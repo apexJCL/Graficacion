@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.itc.e1.Custom.CameraHandler;
 
@@ -115,6 +116,14 @@ public class ModelViewer {
                 directionalLight.color.set(color);
                 break;
         }
+    }
+
+    public Vector3 getDirectionalCoordinates(){
+        return directionalLight.direction;
+    }
+
+    public void updateDirectionalLight(float x, float y, float z){
+        directionalLight.direction.set(directionalLight.direction.x + x, directionalLight.direction.y + y, directionalLight.direction.z + z);
     }
 
     public enum ColorSelector{
