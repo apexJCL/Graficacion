@@ -4,15 +4,15 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.Menu;
-import com.kotcrab.vis.ui.widget.MenuBar;
-import com.kotcrab.vis.ui.widget.MenuItem;
+import com.kotcrab.vis.ui.widget.*;
 import com.kotcrab.vis.ui.widget.color.ColorPicker;
 import com.kotcrab.vis.ui.widget.color.ColorPickerAdapter;
 
@@ -27,6 +27,7 @@ public class MainScreen implements Screen {
     private Table root;
     private Table container;
     private ColorPicker colorPicker;
+    private VisWindow window;
     private ModelViewer.ColorSelector selector = ModelViewer.ColorSelector.AMBIENT;
 
     public MainScreen() {
@@ -68,6 +69,24 @@ public class MainScreen implements Screen {
                 colorPicker.fadeOut();
             }
         });
+        // Frustum Window
+        window = new VisWindow("Frustum");
+        window.addCloseButton();
+        final VisLabel frustumValue = new VisLabel("0.0");
+        VisSlider frustumSlider = new VisSlider(1, 120, 1,false);
+        frustumSlider.setValue(viewer.getFrustum());
+        frustumSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if(actor instanceof VisSlider) {
+                    viewer.updateFrustum(((VisSlider) actor).getValue());
+                    frustumValue.setText(String.valueOf(((VisSlider)actor).getValue()));
+                }
+            }
+        });
+        window.add(frustumSlider).row();
+        window.add(frustumValue);
+        window.pack();
         colorPicker.setColor(1, 1, 1, 1);
         root.add(menuBar.getTable()).fillX().expandX().top().pad(0).row();
         root.add(container).fill().expand().row();
@@ -120,6 +139,10 @@ public class MainScreen implements Screen {
     }
 
     private void keyListener() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            window.centerWindow();
+            root.addActor(window.fadeIn());
+        }
     }
 
     @Override
@@ -149,7 +172,7 @@ public class MainScreen implements Screen {
     }
 
     public enum Action {
-        DIRECTIONAL, AMBIENT, DEBUG, EXIT
+        FRUSTUM, DIRECTIONAL, AMBIENT, DEBUG, EXIT
     }
 
     public class MenuListener extends ClickListener {

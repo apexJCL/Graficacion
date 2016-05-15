@@ -47,6 +47,15 @@ public class ModelViewer {
         preload();
     }
 
+    public void updateFrustum(float value){
+        camera.fieldOfView = value;
+        camera.update();
+    }
+
+    public float getFrustum(){
+        return camera.fieldOfView;
+    }
+
     private void preload() {
         // Leer archivo y agregar a cola de carga
         FileHandle list = Gdx.files.internal("models.txt");
