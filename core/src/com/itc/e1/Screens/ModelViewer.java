@@ -12,22 +12,37 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.itc.e1.Custom.CameraHandler;
+import com.itc.e1.Custom.SceneDescriptor;
 
 import java.util.StringTokenizer;
 
 public class ModelViewer {
-    private final Environment environment;
-    private final ColorAttribute ambientLight;
-    private final DirectionalLight directionalLight;
-    private final PerspectiveCamera camera;
-    private final float FOV = 20;
-    private final CameraHandler cameraController;
-    private final AssetManager assets;
+    private Environment environment;
+    private ColorAttribute ambientLight;
+    private DirectionalLight directionalLight;
+    private PerspectiveCamera camera;
+    private float FOV = 20;
+    private CameraHandler cameraController;
+    private AssetManager assets;
     private ModelBatch modelBatch;
     private boolean loading = true;
     private Array<ModelInstance> instances = new Array<ModelInstance>(0);
+    private String route;
+    private SceneDescriptor sceneDescriptor;
 
-    public ModelViewer(){
+    public ModelViewer(String sceneName){
+        init();
+        route = "scenes/"+sceneName+"/";
+        preload_Normal();
+    }
+
+    public ModelViewer(SceneDescriptor sceneDescriptor) {
+        this.sceneDescriptor = sceneDescriptor;
+        init();
+        loadSceneDescriptor();
+    }
+
+    private void init(){
         modelBatch = new ModelBatch();
         environment = new Environment();
         ambientLight = new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1); // Cambiar
@@ -42,7 +57,6 @@ public class ModelViewer {
         camera.update();
         cameraController = new CameraHandler(camera);
         assets = new AssetManager();
-        preload();
     }
 
     public void updateFrustum(float value){
@@ -54,21 +68,31 @@ public class ModelViewer {
         return camera.fieldOfView;
     }
 
-    private void preload() {
+    private void preload_Normal() {
         // Leer archivo y agregar a cola de carga
-        FileHandle list = Gdx.files.internal("models.txt");
+        FileHandle list = Gdx.files.internal(route+"/models.txt");
         String modelList = list.readString();
         StringTokenizer st = new StringTokenizer(modelList, "\r\n");
         while(st.hasMoreElements())
-            assets.load(st.nextToken(), Model.class);
+            assets.load(route+st.nextToken(), Model.class);
+    }
+
+
+    private void loadSceneDescriptor() {
+        for(String model: sceneDescriptor.modelRoutes)
+            assets.load(sceneDescriptor.PATH+model, Model.class);
     }
 
     public void render(){
 
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        if(assets.update() && loading)
-            doneLoading();
+        if(assets.update() && loading) {
+            if (sceneDescriptor != null)
+                doneLoadingScene();
+            else
+                doneLoading();
+        }
 
         modelBatch.begin(camera);
         modelBatch.render(instances, environment);
@@ -77,17 +101,30 @@ public class ModelViewer {
     }
 
     private void doneLoading() {
-        Model handGun = assets.get("models/handgun/handgun.g3db", Model.class);
-        ModelInstance handgunInstance = new ModelInstance(handGun);
-        cameraController.setModel(handgunInstance);
-        instances.add(handgunInstance);
+        String tmp = Gdx.files.internal(route+"default.txt").readString();
+        String modelName = tmp.substring(0, tmp.indexOf("\r\n"));
+        Model defModel = assets.get(route+"models/"+modelName+"/"+modelName+".g3db", Model.class);
+        ModelInstance defModelInstance = new ModelInstance(defModel);
+        __asset_loader(defModel, defModelInstance);
+        loading = false;
+    }
+
+    private void doneLoadingScene(){
+        Model defModel = assets.get(sceneDescriptor.PATH + sceneDescriptor.defaultModelName, Model.class);
+        ModelInstance defModelInstance = new ModelInstance(defModel);
+        __asset_loader(defModel, defModelInstance);
+        loading = false;
+    }
+
+    private void __asset_loader(Model defModel, ModelInstance defModelInstance){
+        cameraController.setModel(defModelInstance);
+        instances.add(defModelInstance);
         Array<Model> models = new Array<Model>();
         assets.getAll(Model.class, models);
         for(Model model: models){
-            if(model != handGun)
+            if(model != defModel)
                 instances.add(new ModelInstance(model));
         }
-        loading = false;
     }
 
     public void resize(int width, int height){

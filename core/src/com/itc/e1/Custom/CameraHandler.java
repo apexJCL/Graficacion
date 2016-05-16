@@ -3,9 +3,7 @@ package com.itc.e1.Custom;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Vector3;
 
@@ -38,9 +36,6 @@ public class CameraHandler extends CameraInputController {
 
     public void setModel(ModelInstance model){
         this.model = model;
-        for(Material material: model.materials){
-            material.set(new ColorAttribute(ColorAttribute.Diffuse, 0, 1, 1, 1));
-        }
     }
 
     public ModelInstance getModel() {

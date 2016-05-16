@@ -1,0 +1,14 @@
+{
+sceneName: Cubo
+defaultModelName: models/field/field.g3db
+modelRoutes: [
+	{
+		class: java.lang.String
+		value: models/handgun/handgun.g3db
+	}
+    {
+        class: java.lang.String
+        value: models/field/field.g3db
+    }
+]
+}

@@ -1,0 +1,10 @@
+{
+sceneName: Cubo
+defaultModelName: cube
+modelRoutes: [
+	{
+		class: java.lang.String
+		value: models/cube/cube.g3db
+	}
+]
+}

@@ -1,0 +1,9 @@
+{
+sceneName: Prueba
+defaultModelName: cubo
+modelRoutes: [
+	models/cube/cube.g3db
+	models/ball/ball.g3db
+	models/torus/torus.g3db
+]
+}

@@ -1,0 +1,30 @@
+La estructura de la carpeta es la siguiente:
+
+scenes
+  |
+  -- SceneA
+  |
+  -- SceneB
+  .
+  .
+  .
+
+La estructura de cada carpeta de Escena es la siguiente:
+
+SceneA
+  |
+  -- models/
+  -- default.txt
+  -- models.txt
+
+*****************************************************************************************************************
+
+models/ contendrá en carpetas aisladas los modelos 3D (con texturas) de su escena.
+
+default.txt - Contiene el nombre (del archivo .g3db sin extensión) del modelo principal de su escena (Ej: cubo)
+		IMPORTANTE: El archivo default.txt debe terminar con una nueva línea en blanco  debajo del nombre
+		declarado.
+
+models.txt - Contiene las rutas relativas de los archivos g3db de cada modelo. (Ej: models/cubo/cubo.g3db)
+		IMPORTANTE: Para los nombres de las carpetas de cada modelo, ponga el mismo nombre que el 
+		archivo g3db. (Ej: models/cubo/cubo.g3db, models/monito_corriendo/monito_corriendo.g3db)
