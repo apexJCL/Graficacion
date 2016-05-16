@@ -6,10 +6,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector3;
@@ -33,7 +30,7 @@ public class ModelViewer {
     public ModelViewer(){
         modelBatch = new ModelBatch();
         environment = new Environment();
-        ambientLight = new ColorAttribute(ColorAttribute.AmbientLight, 1, 0, 0, 0.3f); // Cambiar
+        ambientLight = new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1); // Cambiar
         environment.set(ambientLight);
         directionalLight = new DirectionalLight().set(0.8f, 0.8f, 0.8f, 1, 1, 1); // Cambiar
         environment.add(directionalLight);
@@ -62,9 +59,8 @@ public class ModelViewer {
         FileHandle list = Gdx.files.internal("models.txt");
         String modelList = list.readString();
         StringTokenizer st = new StringTokenizer(modelList, "\r\n");
-        while(st.hasMoreElements()){
+        while(st.hasMoreElements())
             assets.load(st.nextToken(), Model.class);
-        }
     }
 
     public void render(){
@@ -115,6 +111,8 @@ public class ModelViewer {
             case DIRECTIONAL:
                 directionalLight.color.set(color);
                 break;
+            case DEFAULT:
+                break;
         }
     }
 
@@ -126,7 +124,11 @@ public class ModelViewer {
         directionalLight.direction.set(directionalLight.direction.x + x, directionalLight.direction.y + y, directionalLight.direction.z + z);
     }
 
+    public ModelInstance getDesignated(){
+        return cameraController.getModel();
+    }
+
     public enum ColorSelector{
-        AMBIENT, DIRECTIONAL
+        AMBIENT, DIRECTIONAL, DEFAULT
     }
 }

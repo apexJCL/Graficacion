@@ -22,6 +22,7 @@ public class MainScreen implements Screen {
     private OrthographicCamera renderCamera;
     private boolean debug = false;
     private boolean debugOpenGL = false;
+    private boolean rotate = false;
     private InputMultiplexer inputMultiplexer;
     private ModelViewer viewer;
     private MenuBar menuBar;
@@ -29,8 +30,8 @@ public class MainScreen implements Screen {
     private Table root;
     private Table container;
     private ColorPicker colorPicker;
-    private VisWindow window;
-    private ModelViewer.ColorSelector selector = ModelViewer.ColorSelector.AMBIENT;
+    private VisWindow frustumWindow;
+    private ModelViewer.ColorSelector selector = ModelViewer.ColorSelector.DEFAULT;
     private VisLabel directionalPositionLabel;
     private VisLabel directionalPositionValue;
 
@@ -74,8 +75,8 @@ public class MainScreen implements Screen {
             }
         });
         // Frustum Window
-        window = new VisWindow("Frustum");
-        window.addCloseButton();
+        frustumWindow = new VisWindow("Frustum");
+        frustumWindow.addCloseButton();
         final VisLabel frustumValue = new VisLabel("0.0");
         VisSlider frustumSlider = new VisSlider(1, 120, 1,false);
         frustumSlider.setValue(viewer.getFrustum());
@@ -88,9 +89,10 @@ public class MainScreen implements Screen {
                 }
             }
         });
-        window.add(frustumSlider).row();
-        window.add(frustumValue);
-        window.pack();
+        frustumWindow.add(frustumSlider).row();
+        frustumWindow.add(frustumValue);
+        frustumWindow.pack();
+        // End Frustum Window
         colorPicker.setColor(1, 1, 1, 1);
         root.add(menuBar.getTable()).fillX().expandX().top().pad(0).row();
         root.add(container).fill().expand().row();
@@ -152,6 +154,10 @@ public class MainScreen implements Screen {
 
         if(debugOpenGL)
             updateData();
+
+        if(viewer.getDesignated() != null && rotate){
+            viewer.getDesignated().transform.rotate(new Vector3(0, 1, 0), 1);
+        }
     }
 
     private void updateData() {
@@ -161,9 +167,12 @@ public class MainScreen implements Screen {
 
     private void keyListener(float delta) {
         if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-            window.centerWindow();
-            root.addActor(window.fadeIn());
+            frustumWindow.centerWindow();
+            root.addActor(frustumWindow.fadeIn());
         }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R))
+            rotate = !rotate;
 
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT))
             viewer.updateDirectionalLight(1*delta, 0, 0);
